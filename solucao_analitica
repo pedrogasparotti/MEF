@@ -1,0 +1,29 @@
+import numpy as np
+from sympy import symbols, cos, sin, exp, solve
+from sympy.abc import C1, C2, C3
+
+
+E, L, I, q0, F0, M0, cf = symbols('E L I q0 F0 M0 cf')
+
+r = (np.sqrt(2)/2)*((cf/(E*I))**0.25)
+A = sin(r*L) / cos(r*L)
+B = -(M0*exp(r*L))/(2*(r**2)*E*I*cos(r*L))
+G = (F0*exp(r*L))/(2*(r**3)*E*I*cos(r*L))
+
+eqn1 = C1 + C3 - q0/cf
+eqn2 = C1 + C2 - C3 + C4
+eqn3 = -A*C1*exp(2*r*L) + C2*exp(2*r*L) + A*C3 - C4 - B
+eqn4 = (1+A)*C1*exp(2*r*L) - (1-A)*C2*exp(2*r*L) - (1-A)*C3 - (1+A)*C4 - G
+
+sol = solve((eqn1, eqn2, eqn3, eqn4), (C1, C2, C3, C4))
+
+def sol_analitica(x_points):
+    c1, c2, c3, c4 = sol[C1], sol[C2], sol[C3], sol[C4]
+
+    y = np.zeros_like(x_points, dtype=float)
+    
+    for i, x in enumerate(x_points):
+        f1 = exp(r*x)*(c1*cos(r*x) + c2*sin(r*x))
+        f2 = exp(-r*x)*(c3*cos(r*x) + c4*sin(r*x))
+        y[i] = f1 + f2 + (q0/cf).evalf()
+    return y
